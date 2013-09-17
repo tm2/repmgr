@@ -1,0 +1,80 @@
+Steps by memory:
+
+1. Make sure theres no old installs of postgresql eg 9.0 as it will fluff something up later
+2. Install postgresql:
+sudo apt-get install libxslt-dev libxml2-dev libpam-dev libedit-dev
+
+
+Create the file /etc/apt/sources.list.d/pgdg.list, and add a line for the repositorydeb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
+
+	* Probably dont need this one but just in case: sudo apt-get install postgresql-server-dev-9.0
+
+
+	* Import the repository signing key, and update the package listswget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get updatesudo apt-get install postgresql-9.2sudo apt-get install postgresql-client-9.2sudo apt-get install postgresql-contrib-9.2sudo apt-get install libpq-devsudo apt-get install postgresql-server-dev-9.2
+
+3. Clone the repo & install debian package
+git clone https://github.com/tm2/repmgr.git
+cd repmgr/debianPackageInstaller
+
+sudo dpkg -i postgresql-repmgr-9.2_1.0.0.deb
+4. Dump in the config type files from repmgr/debianPackageInstaller.  Dont dump in the pg_hba.confs as they need to be owned by root. Just edit them
+
+5. Edit /etc/postgresql/postgresql.conf to match the conf in repmgr/debianPackageInstaller/postgresql.conf
+
+6. stick ":/usr/lib/postgresql/9.2/bin" into /etc/environment to add pg_ctl to the PATH
+
+7. Create the user and database to manage replication on master node:
+su - postgres
+createuser -s repmgr
+createdb -O repmgr repmgr
+psql -f /usr/share/postgresql/9.0/contrib/repmgr_funcs.sql repmgr
+
+8. restart the postgresql server on master
+
+9. Create the ssh-key for the postgres user and copy it to other servers:
+su - postgres
+ssh-keygen             # /!\ do not use a passphrase /!\
+cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+exit
+rsync -avz ~postgres/.ssh/authorized_keys node2:~postgres/.ssh/
+rsync -avz ~postgres/.ssh/authorized_keys witness:~postgres/.ssh/
+rsync -avz ~postgres/.ssh/id_rsa* node2:~postgres/.ssh/
+rsync -avz ~postgres/.ssh/id_rsa* witness:~postgres/.ssh/
+
+10. SSH from each device to each other device to add to known_hosts and safe hassle later on
+
+11. Clone Master
+Log in node2. Make sure postgresql is stopped
+Clone the node1 (the current Master):
+su - postgres
+repmgr -d repmgr -U repmgr -h node1 standby clone
+
+Start the PostgreSQL server:
+pg_ctl -D $PGDATA start
+
+12. Register Master and Standby
+Log in node1.
+Register the node as Master:
+su - postgres
+repmgr -f /etc/repmgr/repmgr.conf master register
+
+Log in node2.
+Register the node as Standby:
+su - postgres
+repmgr -f /etc/repmgr/repmgr.conf standby register
+
+Initialize witness serverLog in witness.
+Initialize the witness server:
+su - postgres
+repmgr -d repmgr -U repmgr -h 192.168.1.10 -D $WITNESS_PGDATA -f /etc/repmgr/repmgr.conf witness create
+
+
+It needs information to connect to the master to copy the configuration of the cluster, also it needs to know where it should initialize it's own $PGDATA. As part of the procees it also ask for the superuser password so it can connect when needed.
+
+This bit hasnt been tested yet:
+13. Start the repmgrd daemons
+Log in node2 and witness.
+su - postgres repmgrd -f /etc/repmgr/repmgr.conf > /var/log/postgresql/repmgr.log 2>&1Note:The Master does not need a repmgrd daemon.
+
