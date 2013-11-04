@@ -62,3 +62,13 @@ deb: repmgrd repmgr
 	mv debian.deb ../postgresql-repmgr-9.2_1.0.0.deb
 	rm -rf ./debian/usr
 
+smartos-install: repmgrd repmgr
+	mkdir -p /opt/local/postgres-9.2.4/bin
+	cp repmgrd repmgr /opt/local/postgres-9.2.4/bin
+	cp repmgrd repmgr /opt/local/bin
+	mkdir -p /opt/local/share/postgresql/contrib
+	cp sql/repmgr_funcs.sql /opt/local/share/postgresql/contrib/
+	cp sql/uninstall_repmgr_funcs.sql /opt/local/share/postgresql/contrib/
+	mkdir -p /opt/local/lib/postgresql
+	cp sql/repmgr_funcs.so /opt/local/lib/postgresql
+
