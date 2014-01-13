@@ -54,12 +54,12 @@ deb: repmgrd repmgr
 
 
 smartos-install: repmgrd repmgr
-    mkdir -p /opt/local/postgres-9.2.4/bin
-    cp repmgrd repmgr /opt/local/postgres-9.2.4/bin
-    cp repmgrd repmgr /opt/local/bin
-    mkdir -p /opt/local/share/postgresql/contrib
-    cp sql/repmgr_funcs.sql /opt/local/share/postgresql/contrib/
-    cp sql/uninstall_repmgr_funcs.sql /opt/local/share/postgresql/contrib/
-    mkdir -p /opt/local/lib/postgresql
-    cp sql/repmgr_funcs.so /opt/local/lib/postgresql
+	mkdir -p /opt/local/postgres-9.2.4/bin
+	cp repmgrd repmgr /opt/local/postgres-9.2.4/bin
+	cp repmgrd repmgr /opt/local/bin
+	mkdir -p /opt/local/share/postgresql/contrib
+	cp sql/repmgr_funcs.sql /opt/local/share/postgresql/contrib/
+	cp sql/uninstall_repmgr_funcs.sql /opt/local/share/postgresql/contrib/
+	mkdir -p /opt/local/lib/postgresql
+	cp sql/repmgr_funcs.so /opt/local/lib/postgresql
 
