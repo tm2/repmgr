@@ -10,7 +10,7 @@ Promote standby to be primary
 Bringing up old master as standby
 #Start the vm and stop postgres before running the following:
 
-    sudo -u postgres repmgr -d #{node["repmgr"]["dbName"]} -F -D #{node["repmgr"]["data_directory"]} -R postgres -U repmgr --verbose -h #{node["repmgr"]["master_ip"]} standby clone --force
+    repmgr -d #{node["repmgr"]["dbName"]} -F -D #{node["repmgr"]["data_directory"]} -R postgres -U repmgr --verbose -h #{node["repmgr"]["master_ip"]} standby clone --force
 
 (this step should create a ``recovery.conf``)
 
