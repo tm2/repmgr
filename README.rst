@@ -4,6 +4,8 @@ BZ Notes:
 cd /opt/tm2-repmgr-fork
     repmgr cluster show
 
+Be mindful of stopping the db before commands - if neccessary - work this out - be sure to stop old master before making it a standby - thats for sure
+
 Promote standby to be primary
     sudo -u postgres repmgr --verbose standby promote
 
